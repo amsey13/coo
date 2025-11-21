@@ -46,4 +46,10 @@ public class Velo implements Vehicule {
     public void setEtat(VehiculeState e) {
         this.etat = e;
     }
+
+
+    public VehiculeState getEtat() {
+    return etat;
+}
+
 }

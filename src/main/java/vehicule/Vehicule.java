@@ -1,4 +1,4 @@
-package main.java.vehicle;
+package main.java.vehicule;
 
 import main.java.visitor.Visiteur;
 
@@ -10,3 +10,7 @@ public interface Vehicule {
     void devenirHorsService();
     void accept(Visiteur visiteur);
 }
+
+
+
+
