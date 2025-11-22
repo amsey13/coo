@@ -1,4 +1,4 @@
-package main.java.vehicle;
+package main.java.vehicule;
 
 public class HorsService implements VehiculeState {
     private Velo velo;
