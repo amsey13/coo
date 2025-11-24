@@ -2,6 +2,7 @@ package main.java.vehicule;
 
 import main.java.visitor.Visiteur;
 
+
 public class Velo implements Vehicule {
     private String description;
     private double cout;
@@ -33,10 +34,10 @@ public class Velo implements Vehicule {
         etat.voler();
     }
 
-    @Override
+   /* @Override
     public void devenirHorsService() {
         etat.reparer();
-    }
+    }*/
 
     @Override
     public void accept(Visiteur visiteur) {
@@ -50,6 +51,12 @@ public class Velo implements Vehicule {
 
     public VehiculeState getEtat() {
     return etat;
-}
+    }
+
+    @Override
+    public void devenirHorsService() {
+        etat.mettreHorsService(); 
+    }
+
 
 }

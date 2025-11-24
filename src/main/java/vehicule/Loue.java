@@ -20,4 +20,11 @@ public class Loue implements VehiculeState{
     public void voler() {
         velo.setEtat(new Vole(velo));
     }
+
+    @Override
+    public void mettreHorsService() {
+        velo.setEtat(new HorsService(velo));
+    }
+
+
 }
