@@ -1,44 +1,36 @@
 package test.java.vehicule;
-
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
 import main.java.vehicule.Vehicule;
 import main.java.vehicule.Velo;
 import main.java.visitor.Visiteur;
+import org.junit.jupiter.api.Test;                     
+import static org.junit.jupiter.api.Assertions.*;
 
-
-
-//Teste le comportement public du vélo, Disponibilité initiale, description, coût, vol, hors-service, visitor                      |
-
-
-class VeloTest {
+public class VeloTest {  
 
     @Test
-    void testDisponibiliteInitiale() {
+    public void testDisponibiliteInitiale() {  
         Velo v = new Velo("Vélo classique", 1.0);
-        assertTrue(v.estDisponible());
+        assertTrue(v.estDisponible(), "Le vélo doit être disponible à la création");
         assertEquals("Vélo classique", v.getDescription());
         assertEquals(1.0, v.getCout());
     }
 
     @Test
-    void testVol() {
+    public void testVol() {
         Velo v = new Velo("Vélo classique", 1.0);
         v.signalerVol();
-        assertFalse(v.estDisponible());
+        assertFalse(v.estDisponible(), "Le vélo volé ne doit plus être disponible");
     }
 
     @Test
-    void testHorsService() {
+    public void testHorsService() {
         Velo v = new Velo("Vélo classique", 1.0);
         v.devenirHorsService();
-        assertFalse(v.estDisponible());
+        assertFalse(v.estDisponible(), "Le vélo hors-service ne doit plus être disponible");
     }
 
     @Test
-    void testVisitor() {
+    public void testVisitor() {
         Velo v = new Velo("Vélo classique", 1.0);
 
         class VisitorTest implements Visiteur {
@@ -53,6 +45,10 @@ class VeloTest {
         VisitorTest visitor = new VisitorTest();
         v.accept(visitor);
 
-        assertTrue(visitor.visited);
+        assertTrue(visitor.visited, "Le visiteur doit avoir visité le vélo");
     }
+
+    
+
+
 }

@@ -19,4 +19,10 @@ public class HorsService implements VehiculeState {
     public void voler() {
         velo.setEtat(new Vole(velo));
     }
+
+    @Override
+    public void mettreHorsService() {
+        // déjà hors-service, rien à faire
+    }
+
 }
