@@ -1,6 +1,6 @@
 package main.java.accessories;
 
-import main.java.vehicle.Vehicule;
+import main.java.vehicule.Vehicule;
 
 public class Panier extends VehiculeDecorator {
         public Panier(Vehicule v) {

@@ -58,4 +58,9 @@ public class Station implements Subject {
             notifyObservers("Retrait effectué");
         }
     }
+
+	public int getId() {
+		// TODO Auto-generated method stub
+		return this.id ;
+	}
 }

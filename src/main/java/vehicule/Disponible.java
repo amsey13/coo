@@ -1,4 +1,4 @@
-package main.java.vehicle;
+package main.java.vehicule;
 
 public class Disponible implements VehiculeState {
         private Velo velo;

@@ -1,7 +1,8 @@
 package main.java.accessories;
 
-import main.java.visitor.*;
-import main.java.vehicle.*;
+import main.java.visitor.Visiteur;
+import main.java.vehicule.*;
+import main.java.vehicule.Vehicule;
 
 public class VehiculeDecorator implements Vehicule {
      protected Vehicule decoratedVehicule;
