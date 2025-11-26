@@ -1,5 +1,6 @@
 package main.java.vehicule;
 
+
 public class Vole implements VehiculeState {
     
     private Velo velo;
@@ -16,4 +17,8 @@ public class Vole implements VehiculeState {
 
     @Override
     public void voler() {}
+
+   @Override
+   public void mettreHorsService(){}   
+
 }
