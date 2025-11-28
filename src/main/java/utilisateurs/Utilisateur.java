@@ -33,6 +33,7 @@ public class Utilisateur {
     public void rendreVehicule (){
         if(aUnVehicule()){
             System.out.println("Utilisateur " + id +" a rendu le vehicule " + vehiculeLoueId);
+             vehiculeLoueId = null;
         }else{
             System.out.println( "Aucun vehicule a rendre");
         }
