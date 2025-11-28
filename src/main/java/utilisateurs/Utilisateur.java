@@ -44,7 +44,7 @@ public class Utilisateur {
     public int getId(){
         return id;
     }
-    public int getVehiculeLoueId(){
+    public Integer getVehiculeLoueId(){
         return vehiculeLoueId;
     }
 }
