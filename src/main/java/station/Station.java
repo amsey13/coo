@@ -14,6 +14,8 @@ public class Station implements Subject {
     private List<Emplacement> emplacements;
 
     private List<Observer> observers = new ArrayList<>();
+    private int toursVideConsecutifs = 0;
+    private int toursPleinesConsecutifs = 0;
 
     public Station(int id, int capacite) {
         this.id = id;
@@ -36,6 +38,15 @@ public class Station implements Subject {
     public boolean estVide() {
         return nbVehicules() == 0;
     }
+
+    public boolean aBesoinDeVelo() {
+        return nbVehicules() < capacite / 4;
+    }
+
+    public boolean aTropDeVelos() {
+        return nbVehicules() > capacite * 3 / 4;
+    }
+
 
     public int nbVehicules() {
         int count = 0;
@@ -78,13 +89,71 @@ public class Station implements Subject {
     // --- Retirer un véhicule ---
     public Vehicule retirer() {
         for (Emplacement e : emplacements) {
-            if (!e.estLibre()) {
-                Vehicule v = e.retirer();
-                notifyObservers("Retrait de " + v.getDescription());
+            Vehicule v = e.getVehicule();
+            if (v != null && v.estDisponible()) {
+                e.retirer();
+                notifyObservers("vehicule_retire");
                 return v;
             }
         }
         notifyObservers("tentative de retrait mais station vide");
         return null;
+    }
+
+    public void mettreAJourCompteursOccupation() {
+        if (estVide()) {
+            toursVideConsecutifs++;
+            toursPleinesConsecutifs = 0;
+        } else if (estPleine()) {
+            toursPleinesConsecutifs++;
+            toursVideConsecutifs = 0;
+        } else {
+            // Ni vide ni pleine → on reset les deux compteurs
+            toursVideConsecutifs = 0;
+            toursPleinesConsecutifs = 0;
+        }
+    }
+
+    public int getToursVideConsecutifs() {
+        return toursVideConsecutifs;
+    }
+
+    public int getToursPleinesConsecutifs() {
+        return toursPleinesConsecutifs;
+    }
+    public void verifierVolsPotentiels() {
+
+        // Si la station est vide → rien à voler
+        if (estVide()) return;
+
+        // Si plus d'un vélo → aucun vélo n'est "seul"
+        if (nbVehicules() > 1) {
+            // reset tous les compteurs
+            for (Emplacement e : emplacements) {
+                e.resetToursSeul();
+            }
+            return;
+        }
+
+        // Ici on sait : EXACTEMENT 1 vélo dans toute la station
+        for (Emplacement e : emplacements) {
+            if (!e.estLibre()) {
+
+                // Incrementer le compteur
+                e.incrementerToursSeul();
+
+                // Le vélo est volé après 2 tours
+                if (e.getToursSeul() >= 2) {
+                    Vehicule v = e.getVehicule();
+                    v.signalerVol();
+                    System.out.println("Vélo volé dans station " + id + " : " + v.getDescription());
+
+                    // On enlève définitivement le vélo
+                    e.retirer();
+                }
+            } else {
+                e.resetToursSeul();
+            }
+        }
     }
 }

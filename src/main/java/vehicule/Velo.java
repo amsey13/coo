@@ -3,14 +3,13 @@ package main.java.vehicule;
 import main.java.visitor.Visiteur;
 
 
-public class Velo implements Vehicule {
+public class Velo extends AbstractVehicule {
     private String description;
     private double cout;
     private VehiculeState etat;
 
     public Velo(String description, double cout) {
-        this.description = description;
-        this.cout = cout;
+        super(description, cout);
         this.etat = new Disponible(this);
     }
 

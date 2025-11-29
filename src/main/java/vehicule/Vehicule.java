@@ -7,8 +7,10 @@ public interface Vehicule {
     double getCout();
     boolean estDisponible();
     void signalerVol();
+    void enregistrerLocation();
     void devenirHorsService();
     void accept(Visiteur visiteur);
+    void tourDeMaintenance();
 }
 
 

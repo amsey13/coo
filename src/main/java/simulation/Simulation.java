@@ -82,9 +82,12 @@ public class Simulation {
         System.out.println("\n--- Temps = " + tempsCourant + " ---");
 
         genererActionsAleatoires();
-
+        // Vérification des vols potentiels
+        for (Station s : stations) {
+            s.verifierVolsPotentiels();
+        }
         // Redistribution manuelle simple
-        centre.redistribuerVehicules();
+        centre.verifierStationsEtRedistribuerSiNecessaire();
 
         tempsCourant += intervalleTemps;
     }

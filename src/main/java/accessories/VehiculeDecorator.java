@@ -1,7 +1,6 @@
 package main.java.accessories;
 
 import main.java.visitor.Visiteur;
-import main.java.vehicule.*;
 import main.java.vehicule.Vehicule;
 
 public class VehiculeDecorator implements Vehicule {
@@ -39,5 +38,14 @@ public class VehiculeDecorator implements Vehicule {
     @Override
     public void accept(Visiteur visiteur) {
         decoratedVehicule.accept(visiteur);
+    }
+
+    @Override
+    public void enregistrerLocation() {
+        decoratedVehicule.enregistrerLocation();
+    }
+    @Override
+    public void tourDeMaintenance(){
+        decoratedVehicule.tourDeMaintenance();
     }
 }

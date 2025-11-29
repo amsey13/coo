@@ -33,11 +33,6 @@ public class CentreControle implements Observer {
     @Override
     public void update(String event) {
         historique += "Centre " + id + " notification : " + event + "\n";
-
-        // Exemple simple : si un événement contient "vide" ou "pleine" → redistribution
-        if ((event.contains("vide") || event.contains("pleine")) && strategy != null) {
-            strategy.redistribuer(stations);
-        }
     }
 
     // --- Strategy ---
@@ -53,5 +48,25 @@ public class CentreControle implements Observer {
 
     public String getHistorique() {
         return historique;
+    }
+
+    public void verifierStationsEtRedistribuerSiNecessaire() {
+        boolean besoinRedistribution = false;
+
+        //  mise à jour des compteurs pour chaque station
+        for (Station s : stations) {
+            s.mettreAJourCompteursOccupation();
+
+            if (s.getToursVideConsecutifs() > 2 ||
+                s.getToursPleinesConsecutifs() > 2) {
+                besoinRedistribution = true;
+            }
+        }
+
+        // Si au moins une station pose problème → on redistribue
+        if (besoinRedistribution) {
+            redistribuerVehicules();
+            // historique += "\nRedistribution après stations vides/pleines > 2 intervalles";
+        }
     }
 }

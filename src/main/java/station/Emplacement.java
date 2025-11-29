@@ -5,6 +5,7 @@ public class Emplacement {
 
     private int id;
     private Vehicule vehicule; // null si emplacement libre
+    private int toursSeul = 0;
 
     public Emplacement(int id) {
         this.id = id;
@@ -36,5 +37,17 @@ public class Emplacement {
 
     public int getId() {
         return id;
+    }
+
+    public void incrementerToursSeul() {
+        toursSeul++;
+    }
+
+    public void resetToursSeul() {
+        toursSeul = 0;
+    }
+
+    public int getToursSeul() {
+        return toursSeul;
     }
 }
