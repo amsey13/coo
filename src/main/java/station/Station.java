@@ -27,6 +27,7 @@ public class Station implements Subject {
         }
     }
 
+
     public int getId() {
         return id;
     }
@@ -91,6 +92,7 @@ public class Station implements Subject {
         for (Emplacement e : emplacements) {
             Vehicule v = e.getVehicule();
             if (v != null && v.estDisponible()) {
+                v.enregistrerLocation();
                 e.retirer();
                 notifyObservers("vehicule_retire");
                 return v;
@@ -153,6 +155,14 @@ public class Station implements Subject {
                 }
             } else {
                 e.resetToursSeul();
+            }
+        }
+    }
+    public void avancerMaintenanceVehicules() {
+        for (Emplacement e : emplacements) {
+            Vehicule v = e.getVehicule();
+            if (v != null) {
+                v.tourDeMaintenance();
             }
         }
     }

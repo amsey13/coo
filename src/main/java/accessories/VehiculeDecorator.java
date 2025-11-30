@@ -48,4 +48,9 @@ public class VehiculeDecorator implements Vehicule {
     public void tourDeMaintenance(){
         decoratedVehicule.tourDeMaintenance();
     }
+
+    @Override
+    public void demarrerMaintenance(int nbTours){
+        decoratedVehicule.demarrerMaintenance(nbTours);;
+    }
 }

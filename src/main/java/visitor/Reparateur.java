@@ -13,6 +13,7 @@ public class Reparateur implements Visiteur {
     @Override
     public void visiterVehicule(Vehicule v) {
         System.out.println("Réparateur " + id + " inspecte : " + v.getDescription());
-        v.devenirHorsService(); 
+        // 1 intervalle de temps de contrôle
+        v.demarrerMaintenance(1);
     }
 }

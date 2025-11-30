@@ -1,18 +1,19 @@
 package main.java.accessories;
+
 import main.java.vehicule.Vehicule;
 
-public class Panier extends VehiculeDecorator {
-    public Panier(Vehicule v) {
+public class Pliage extends VehiculeDecorator {
+        public Pliage(Vehicule v) {
         super(v);
     }
 
     @Override
     public String getDescription() {
-        return decoratedVehicule.getDescription() + " + Panier";
+        return decoratedVehicule.getDescription() + " + Pliage";
     }
 
     @Override
     public double getCout() {
-        return decoratedVehicule.getCout() + 1.5;
+        return decoratedVehicule.getCout() + 5;
     }
 }
