@@ -1,6 +1,7 @@
 package main.java.strategy;
 
 import main.java.station.*;
+import main.java.vehicule.Vehicule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,30 +13,61 @@ public class RandomRobinStrategy implements RedistributionStrategy {
 
     @Override
     public void redistribuer(List<Station> stations) {
-
-        if (stations.isEmpty()) return;
-
-        // Choisir une station pleine au hasard
-        List<Station> pleines = new ArrayList<>();
-        for (Station s : stations) if (s.aTropDeVelos()) pleines.add(s);
-
-        List<Station> vides = new ArrayList<>();
-        for (Station s : stations) if (s.aBesoinDeVelo()) vides.add(s);
-
-        if (pleines.isEmpty() || vides.isEmpty()) {
-            System.out.println("[Random] Aucun déplacement possible.");
+        if (stations.isEmpty()) {
             return;
         }
 
-        Station source = pleines.get(random.nextInt(pleines.size()));
-        Station destination = vides.get(random.nextInt(vides.size()));
+        List<Station> pleines = stationsPleines(stations);
+        List<Station> vides   = stationsVides(stations);
 
-        var velo = source.retirer();
-        if (velo == null) return;
+        if (!peutRedistribuer(pleines, vides)) {
+            return;
+        }
 
-        destination.deposer(velo);
+        Station source      = choisirStationAleatoire(pleines);
+        Station destination = choisirStationAleatoire(vides);
 
-        System.out.println("[Random] Déplacement d’un vélo de Station "
-            + source.getId() + " vers Station " + destination.getId());
+        deplacerUnVelo(source, destination);
     }
+
+    private List<Station> stationsPleines(List<Station> stations) {
+        List<Station> pleines = new ArrayList<>();
+        for (Station s : stations) {
+            if (s.aTropDeVelos()) {
+                pleines.add(s);
+            }
+        }
+        return pleines;
+    }
+
+    private List<Station> stationsVides(List<Station> stations) {
+        List<Station> vides = new ArrayList<>();
+        for (Station s : stations) {
+            if (s.aBesoinDeVelo()) {
+                vides.add(s);
+            }
+        }
+        return vides;
+    }
+
+    private boolean peutRedistribuer(List<Station> pleines, List<Station> vides) {
+        return !pleines.isEmpty() && !vides.isEmpty();
+    }
+
+    private Station choisirStationAleatoire(List<Station> candidates) {
+        int index = random.nextInt(candidates.size());
+        return candidates.get(index);
+    }
+
+    private void deplacerUnVelo(Station source, Station destination) {
+        Vehicule vehicule = source.retirerSansEnregistrement(); 
+
+        if (vehicule == null) {
+            return;
+        }
+
+        destination.deposer(vehicule);
+    }
+
+
 }

@@ -4,12 +4,11 @@ import main.java.vehicule.*;
 public class Emplacement {
 
     private int id;
-    private Vehicule vehicule; // null si emplacement libre
+    private Vehicule vehicule;
     private int toursSeul = 0;
 
     public Emplacement(int id) {
         this.id = id;
-        this.vehicule = null;
     }
 
     public boolean estLibre() {
@@ -21,11 +20,15 @@ public class Emplacement {
             this.vehicule = v;
         }
     }
+    private void liberer() {
+        this.vehicule = null;
+        this.toursSeul = 0;
+    }
 
     public Vehicule retirer() {
         if (!estLibre()) {
             Vehicule v = vehicule;
-            vehicule = null;
+             liberer();
             return v;
         }
         return null;

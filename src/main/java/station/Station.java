@@ -102,6 +102,20 @@ public class Station implements Subject {
         return null;
     }
 
+    public Vehicule retirerSansEnregistrement() {
+        for (Emplacement e : emplacements) {
+            Vehicule v = e.getVehicule();
+            if (v != null && v.estDisponible()) {
+                // ici on ne fait PAS v.enregistrerLocation()
+                e.retirer();
+                notifyObservers("vehicule_retire");
+                return v;
+            }
+        }
+        notifyObservers("tentative de retrait mais station vide");
+        return null;
+    }
+
     public void mettreAJourCompteursOccupation() {
         if (estVide()) {
             toursVideConsecutifs++;
@@ -123,41 +137,65 @@ public class Station implements Subject {
     public int getToursPleinesConsecutifs() {
         return toursPleinesConsecutifs;
     }
-    public void verifierVolsPotentiels() {
-
-        // Si la station est vide → rien à voler
-        if (estVide()) return;
-
-        // Si plus d'un vélo → aucun vélo n'est "seul"
-        if (nbVehicules() > 1) {
-            // reset tous les compteurs
-            for (Emplacement e : emplacements) {
-                e.resetToursSeul();
-            }
-            return;
+    /**
+     * Remet à zéro le compteur toursSeul de tous les emplacements.
+     */
+    private void reinitialiserTousLesCompteursToursSeul() {
+        for (Emplacement e : emplacements) {
+            e.resetToursSeul();
         }
+    }
 
-        // Ici on sait : EXACTEMENT 1 vélo dans toute la station
+    /**
+     * Traite le cas où la station contient exactement un véhicule.
+     * On incrémente le compteur de l'emplacement occupé, on remet à zéro
+     * celui des emplacements libres, et on détecte un éventuel vol.
+     */
+    private void traiterStationAvecUnSeulVehicule() {
         for (Emplacement e : emplacements) {
             if (!e.estLibre()) {
-
-                // Incrementer le compteur
-                e.incrementerToursSeul();
-
-                // Le vélo est volé après 2 tours
-                if (e.getToursSeul() >= 2) {
-                    Vehicule v = e.getVehicule();
-                    v.signalerVol();
-                    System.out.println("Vélo volé dans station " + id + " : " + v.getDescription());
-
-                    // On enlève définitivement le vélo
-                    e.retirer();
-                }
+                gererEmplacementOccupeSeul(e);
             } else {
                 e.resetToursSeul();
             }
         }
     }
+
+    /**
+     * Incrémente le compteur pour l'emplacement occupé et déclenche un vol
+     * si le véhicule est resté seul trop longtemps.
+     */
+    private void gererEmplacementOccupeSeul(Emplacement e) {
+        e.incrementerToursSeul();
+
+        if (e.getToursSeul() >= 2) {
+            Vehicule v = e.getVehicule();
+            if (v != null) {
+                v.signalerVol();
+            }
+            // On enlève définitivement le véhicule volé
+            e.retirer();
+        }
+    }
+
+    public void verifierVolsPotentiels() {
+
+        // 1) Cas station vide : aucun vélo à surveiller
+        if (estVide()) {
+            reinitialiserTousLesCompteursToursSeul();
+            return;
+        }
+
+        // 2) Cas avec plusieurs vélos : aucun n'est "seul"
+        if (nbVehicules() > 1) {
+            reinitialiserTousLesCompteursToursSeul();
+            return;
+        }
+
+        // 3) Cas avec exactement un vélo dans la station
+        traiterStationAvecUnSeulVehicule();
+    }
+
     public void avancerMaintenanceVehicules() {
         for (Emplacement e : emplacements) {
             Vehicule v = e.getVehicule();

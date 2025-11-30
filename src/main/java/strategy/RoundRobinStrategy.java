@@ -3,57 +3,84 @@ package main.java.strategy;
 
 
 import main.java.station.Station;
+import main.java.vehicule.Vehicule;
+import java.util.ArrayList;
 import java.util.List;
 
 public class RoundRobinStrategy implements RedistributionStrategy {
 
     private int index = 0;
 
-@Override
+    @Override
     public void redistribuer(List<Station> stations) {
+        if (stations.isEmpty()) {
+            return;
+        }
 
-        if (stations.isEmpty()) return;
+        List<Station> pleines = stationsPleines(stations);
+        List<Station> vides   = stationsVides(stations);
 
-        // Trouver une station pleine
-        Station source = null;
+        if (pleines.isEmpty() || vides.isEmpty()) {
+            return;
+        }
+
+        Station source      = choisirStationSource(pleines);
+        Station destination = choisirStationDestination(stations);
+
+        deplacerUnVelo(source, destination);
+    }
+
+    /**
+     * Renvoie les stations ayant trop de vélos.
+     */
+    private List<Station> stationsPleines(List<Station> stations) {
+        List<Station> pleines = new ArrayList<>();
         for (Station s : stations) {
             if (s.aTropDeVelos()) {
-                source = s;
-                break;
+                pleines.add(s);
             }
         }
+        return pleines;
+    }
 
-        // Trouver une station vide
-        Station destination = null;
+    /**
+     * Renvoie les stations ayant besoin d'un vélo.
+     */
+    private List<Station> stationsVides(List<Station> stations) {
+        List<Station> vides = new ArrayList<>();
         for (Station s : stations) {
             if (s.aBesoinDeVelo()) {
-                destination = s;
-                break;
+                vides.add(s);
             }
         }
+        return vides;
+    }
 
-        if (source == null || destination == null) {
-            System.out.println("[RoundRobin] Aucun mouvement possible.");
-            return;
-        }
+    /**
+     * Ici on peut choisir la source en RoundRobin parmi les pleines,
+     * ou simplement prendre la première.
+     */
+    private Station choisirStationSource(List<Station> pleines) {
+        int indexSource = index % pleines.size();
+        return pleines.get(indexSource);
+    }
 
-        // Récupérer un vélo de la station source
-        var velo = source.retirer();
-        if (velo == null) {
-            System.out.println("[RoundRobin] Aucun vélo à retirer dans station pleine.");
-            return;
-        }
-
-        // Rediriger en RoundRobin → choisir une destination
+    /**
+     * Destination en RoundRobin dans *toutes* les stations.
+     */
+    private Station choisirStationDestination(List<Station> stations) {
         int indexDest = index % stations.size();
-        destination = stations.get(indexDest);
         index++;
+        return stations.get(indexDest);
+    }
 
-        // Déposer dans la destination
+    private void deplacerUnVelo(Station source, Station destination) {
+        Vehicule velo = source.retirerSansEnregistrement(); // ou retirer()
+
+        if (velo == null) {
+            return;
+        }
+
         destination.deposer(velo);
-
-        System.out.println("[RoundRobin] Déplacement d’un vélo de Station "
-            + source.getId() + " vers Station " + destination.getId());
     }
 }
-

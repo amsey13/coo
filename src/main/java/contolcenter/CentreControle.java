@@ -66,7 +66,6 @@ public class CentreControle implements Observer {
         // Si au moins une station pose problème → on redistribue
         if (besoinRedistribution) {
             redistribuerVehicules();
-            // historique += "\nRedistribution après stations vides/pleines > 2 intervalles";
         }
     }
 }
