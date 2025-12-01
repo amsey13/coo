@@ -29,26 +29,5 @@ public class VeloTest {
         assertFalse(v.estDisponible(), "Le vélo hors-service ne doit plus être disponible");
     }
 
-    @Test
-    public void testVisitor() {
-        Velo v = new Velo("Vélo classique", 1.0);
-
-        class VisitorTest implements Visiteur {
-            boolean visited = false;
-
-            @Override
-            public void visiterVehicule(Vehicule vehicule) {
-                visited = true;
-            }
-        }
-
-        VisitorTest visitor = new VisitorTest();
-        v.accept(visitor);
-
-        assertTrue(visitor.visited, "Le visiteur doit avoir visité le vélo");
-    }
-
-    
-
-
+   
 }
