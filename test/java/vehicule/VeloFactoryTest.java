@@ -1,5 +1,6 @@
-package main.java.factory;
+package test.java.vehicule;
 
+import main.java.factory.VeloFactory;
 import main.java.vehicule.Vehicule;
 import main.java.vehicule.Velo;
 import org.junit.jupiter.api.Test;

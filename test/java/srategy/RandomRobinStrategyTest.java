@@ -1,6 +1,7 @@
-package main.java.strategy;
+package test.java.srategy;
 
 import main.java.station.Station;
+import main.java.strategy.RandomRobinStrategy;
 import main.java.vehicule.Velo;
 import org.junit.jupiter.api.Test;
 

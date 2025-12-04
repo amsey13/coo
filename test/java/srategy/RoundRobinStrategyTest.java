@@ -1,6 +1,7 @@
-package main.java.strategy;
+package test.java.srategy;
 
 import main.java.station.Station;
+import main.java.strategy.RoundRobinStrategy;
 import main.java.vehicule.Velo;
 import org.junit.jupiter.api.Test;
 
@@ -71,18 +72,22 @@ public class RoundRobinStrategyTest {
 
     @Test
     void testRoundRobinMultipleRedistribution() {
-        Station s1 = new Station(1, 4);
-        Station s2 = new Station(2, 4);
-        Station s3 = new Station(3, 4);
+        // CORRECTION : On utilise une capacité de 10. Seuil = 7.5 -> 7.
+        // Si on met 10 vélos :
+        // 1. 10 > 7.5 -> Retrait. Reste 9.
+        // 2. 9 > 7.5 -> Retrait. Reste 8.
+        // 3. 8 > 7.5 -> Retrait. Reste 7.
+        // Cela permet de tester plusieurs redistributions successives.
+        Station s1 = new Station(1, 10); 
+        Station s2 = new Station(2, 10);
+        Station s3 = new Station(3, 10);
 
-        // s1 pleine
-        s1.deposer(new Velo("V1", 10));
-        s1.deposer(new Velo("V2", 10));
-        s1.deposer(new Velo("V3", 10));
-        s1.deposer(new Velo("V4", 10));
+        // s1 pleine (10 vélos)
+        for (int i = 0; i < 10; i++) {
+            s1.deposer(new Velo("V" + i, 10));
+        }
 
-        // s2 vide
-        // s3 vide
+        // s2 vide, s3 vide
         List<Station> stations = new ArrayList<>();
         stations.add(s1);
         stations.add(s2);
@@ -90,14 +95,13 @@ public class RoundRobinStrategyTest {
 
         RoundRobinStrategy strategy = new RoundRobinStrategy();
 
-        // Redistribuer plusieurs fois pour tester le Round Robin
-        strategy.redistribuer(stations); // 1er vélo -> s2
-        strategy.redistribuer(stations); // 2e vélo -> s3
-        strategy.redistribuer(stations); // 3e vélo -> s1 ?
-
-        // Vérification simple
+        // Redistribuer plusieurs fois
+        strategy.redistribuer(stations); // 1er vélo -> s2 (car s2 vide)
+        strategy.redistribuer(stations); // 2e vélo -> s3 (car s3 vide)
+        
+        // Vérification
         assertEquals(1, s2.nbVehicules(), "s2 reçoit 1 vélo");
         assertEquals(1, s3.nbVehicules(), "s3 reçoit 1 vélo");
-        assertEquals(2, s1.nbVehicules(), "s1 perd 2 vélos"); // 4 - 2 = 2
+        assertEquals(8, s1.nbVehicules(), "s1 perd 2 vélos");
     }
 }

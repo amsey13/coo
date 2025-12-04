@@ -1,7 +1,5 @@
 package test.java.vehicule;
-import main.java.vehicule.Vehicule;
 import main.java.vehicule.Velo;
-import main.java.visitor.Visiteur;
 import org.junit.jupiter.api.Test;                     
 import static org.junit.jupiter.api.Assertions.*;
 

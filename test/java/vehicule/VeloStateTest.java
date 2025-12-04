@@ -1,17 +1,8 @@
 package test.java.vehicule;
+
 import main.java.vehicule.*;
-
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
-
-
-//Tester le **pattern State** Transitions entre états 
-
-
-
-
+import org.junit.jupiter.api.Test; 
+import static org.junit.jupiter.api.Assertions.*;
 
 class VeloStateTest {
 
@@ -48,6 +39,14 @@ class VeloStateTest {
     @Test
     void testHorsServiceToDisponible() {
         Velo v = new Velo("Vélo classique", 1.0);
+        
+        // CORRECTION ICI : utiliser mettreHorsService() sur l'état
+        v.getEtat().mettreHorsService(); 
+        
+        // Vérification que le vélo est bien Hors Service
+        assertTrue(v.getEtat() instanceof HorsService);
+        
+        // Test de la réparation
         v.getEtat().reparer(); // HorsService -> Disponible
         assertTrue(v.estDisponible());
         assertTrue(v.getEtat() instanceof Disponible);

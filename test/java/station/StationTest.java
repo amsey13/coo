@@ -1,6 +1,7 @@
-package main.java.station;
+package test.java.station;
 
 import main.java.vehicule.Velo;
+import main.java.station.Station;
 import main.java.vehicule.Vehicule;
 import org.junit.jupiter.api.Test;
 

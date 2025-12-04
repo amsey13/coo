@@ -1,7 +1,9 @@
-package main.java.visitor;
+package test.java.visitor;
 
 import main.java.factory.VeloFactory;
 import main.java.vehicule.Vehicule;
+import main.java.visitor.Peintre;
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

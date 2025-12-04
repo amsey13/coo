@@ -1,15 +1,14 @@
-package main.java.contolcenter;
+package test.java.centreControle;
 
+import main.java.contolcenter.CentreControle;
 import main.java.station.Station;
 import main.java.vehicule.Velo;
-import main.java.strategy.RedistributionStrategy;
 import main.java.strategy.RoundRobinStrategy;
 import main.java.strategy.RandomRobinStrategy;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.List;
 
 public class CentreControleTest {
 
