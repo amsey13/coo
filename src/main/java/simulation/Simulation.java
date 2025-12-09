@@ -1,4 +1,4 @@
-package main.java.simulation;
+package simulation;
 
 import main.java.accessories.Panier;
 import main.java.contolcenter.*;
@@ -205,5 +205,15 @@ public class Simulation {
         Simulation sim = new Simulation();
         sim.lancer(5);  // exécute 5 tours
     }
+
+
+    public List<Station> getStations() {
+    return stations;
+    }
+
+    public CentreControle getCentre() {
+        return centre;
+    }
+
 }
 
