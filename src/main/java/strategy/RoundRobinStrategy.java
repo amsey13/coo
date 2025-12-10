@@ -1,7 +1,7 @@
-package main.java.strategy;
+package strategy;
 
-import main.java.station.Station;
-import main.java.vehicule.Vehicule;
+import station.Station;
+import vehicule.Vehicle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,49 +10,49 @@ public class RoundRobinStrategy implements RedistributionStrategy {
     private int index = 0;
 
     @Override
-    public void redistribuer(List<Station> stations) {
+    public void redistribute(List<Station> stations) {
         if (stations.isEmpty()) return;
 
-        List<Station> pleines = stationsPleines(stations);
-        List<Station> vides = stationsVides(stations);
+        List<Station> full = fullStations(stations);
+        List<Station> needy = needyStations(stations);
 
-        if (pleines.isEmpty() || vides.isEmpty()) return;
+        if (full.isEmpty() || needy.isEmpty()) return;
 
-        Station source = choisirStationSource(pleines);
-        Station destination = choisirStationDestination(vides);
+        Station source = chooseSourceStation(full);
+        Station destination = chooseDestinationStation(needy);
 
-        deplacerUnVelo(source, destination);
+        moveOneVehicle(source, destination);
     }
 
-    private List<Station> stationsPleines(List<Station> stations) {
-        List<Station> pleines = new ArrayList<>();
+    private List<Station> fullStations(List<Station> stations) {
+        List<Station> full = new ArrayList<>();
         for (Station s : stations) {
-            if (s.aTropDeVelos()) pleines.add(s);
+            if (s.hasTooManyVehicles()) full.add(s);
         }
-        return pleines;
+        return full;
     }
 
-    private List<Station> stationsVides(List<Station> stations) {
-        List<Station> vides = new ArrayList<>();
+    private List<Station> needyStations(List<Station> stations) {
+        List<Station> needy = new ArrayList<>();
         for (Station s : stations) {
-            if (s.aBesoinDeVelo()) vides.add(s);
+            if (s.needsVehicles()) needy.add(s);
         }
-        return vides;
+        return needy;
     }
 
-    private Station choisirStationSource(List<Station> pleines) {
-        int idx = index % pleines.size();
-        return pleines.get(idx);
+    private Station chooseSourceStation(List<Station> full) {
+        int idx = index % full.size();
+        return full.get(idx);
     }
 
-    private Station choisirStationDestination(List<Station> vides) {
-        int idx = index % vides.size();
+    private Station chooseDestinationStation(List<Station> needy) {
+        int idx = index % needy.size();
         index++;
-        return vides.get(idx);
+        return needy.get(idx);
     }
 
-    private void deplacerUnVelo(Station source, Station destination) {
-        Vehicule v = source.retirerSansEnregistrement();
-        if (v != null) destination.deposer(v);
+    private void moveOneVehicle(Station source, Station destination) {
+        Vehicle v = source.removeWithoutRecording();
+        if (v != null) destination.deposit(v);
     }
 }

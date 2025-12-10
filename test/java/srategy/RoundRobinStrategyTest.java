@@ -1,30 +1,34 @@
-package test.java.srategy;
+package srategy;
 
-import main.java.station.Station;
-import main.java.strategy.RoundRobinStrategy;
-import main.java.vehicule.Velo;
+import station.Station;
+import strategy.RoundRobinStrategy;
+import vehicule.Bike;
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Tests for the {@link RoundRobinStrategy}. This strategy redistributes one vehicle at a time
+ * in a round-robin fashion among the stations, balancing occupancy levels.
+ */
 public class RoundRobinStrategyTest {
 
     @Test
-    void testRedistributionDeplaceUnVelo() {
-        // --- Préparation des stations ---
+    void testRedistributeMovesOneBike() {
+        // --- Prepare stations ---
         Station s1 = new Station(1, 4);
         Station s2 = new Station(2, 4);
 
-        // Station s1 trop pleine
-        s1.deposer(new Velo("V1", 10));
-        s1.deposer(new Velo("V2", 10));
-        s1.deposer(new Velo("V3", 10));
-        s1.deposer(new Velo("V4", 10)); // 4/4
+        // Station s1 too full
+        s1.deposit(new Bike("V1", 10));
+        s1.deposit(new Bike("V2", 10));
+        s1.deposit(new Bike("V3", 10));
+        s1.deposit(new Bike("V4", 10)); // 4/4
 
-        // s2 vide
-        // 0 vélos
+        // s2 empty
 
         List<Station> stations = new ArrayList<>();
         stations.add(s1);
@@ -32,62 +36,62 @@ public class RoundRobinStrategyTest {
 
         RoundRobinStrategy strategy = new RoundRobinStrategy();
 
-        // Avant redistribution
-        assertEquals(4, s1.nbVehicules());
-        assertEquals(0, s2.nbVehicules());
+        // Before redistribution
+        assertEquals(4, s1.getVehicleCount());
+        assertEquals(0, s2.getVehicleCount());
 
-        // Action : redistribuer un vélo
-        strategy.redistribuer(stations);
+        // Action: redistribute one bike
+        strategy.redistribute(stations);
 
-        // Après redistribution
-        assertEquals(3, s1.nbVehicules(), "La station s1 doit perdre un vélo");
-        assertEquals(1, s2.nbVehicules(), "La station s2 doit recevoir un vélo");
+        // After redistribution
+        assertEquals(3, s1.getVehicleCount(), "Station s1 should lose one bike");
+        assertEquals(1, s2.getVehicleCount(), "Station s2 should gain one bike");
     }
 
     @Test
-    void testAucuneRedistributionSiPasDeStationPleineOuVide() {
+    void testNoRedistributionIfNoFullOrEmptyStation() {
         Station s1 = new Station(1, 4);
         Station s2 = new Station(2, 4);
 
-        s1.deposer(new Velo("V1", 10));
-        s2.deposer(new Velo("V2", 10));
+        s1.deposit(new Bike("V1", 10));
+        s2.deposit(new Bike("V2", 10));
 
         List<Station> stations = List.of(s1, s2);
 
         RoundRobinStrategy strategy = new RoundRobinStrategy();
 
-        strategy.redistribuer(stations);
+        strategy.redistribute(stations);
 
-        // Rien ne change
-        assertEquals(1, s1.nbVehicules());
-        assertEquals(1, s2.nbVehicules());
+        // Nothing should change
+        assertEquals(1, s1.getVehicleCount());
+        assertEquals(1, s2.getVehicleCount());
     }
 
     @Test
-    void testAucuneRedistributionSiListeVide() {
+    void testNoRedistributionIfListEmpty() {
         RoundRobinStrategy strategy = new RoundRobinStrategy();
 
-        strategy.redistribuer(new ArrayList<>()); // ne doit pas planter
+        strategy.redistribute(new ArrayList<>()); // should not throw
     }
 
     @Test
     void testRoundRobinMultipleRedistribution() {
-        // CORRECTION : On utilise une capacité de 10. Seuil = 7.5 -> 7.
-        // Si on met 10 vélos :
-        // 1. 10 > 7.5 -> Retrait. Reste 9.
-        // 2. 9 > 7.5 -> Retrait. Reste 8.
-        // 3. 8 > 7.5 -> Retrait. Reste 7.
-        // Cela permet de tester plusieurs redistributions successives.
+        // Using a capacity of 10. Threshold = 7.5 -> 7.
+        // If we put 10 bikes:
+        // 1. 10 > 7.5 -> Remove. Remains 9.
+        // 2. 9 > 7.5  -> Remove. Remains 8.
+        // 3. 8 > 7.5  -> Remove. Remains 7.
+        // This tests multiple successive redistributions.
         Station s1 = new Station(1, 10); 
         Station s2 = new Station(2, 10);
         Station s3 = new Station(3, 10);
 
-        // s1 pleine (10 vélos)
+        // s1 full (10 bikes)
         for (int i = 0; i < 10; i++) {
-            s1.deposer(new Velo("V" + i, 10));
+            s1.deposit(new Bike("V" + i, 10));
         }
 
-        // s2 vide, s3 vide
+        // s2 empty, s3 empty
         List<Station> stations = new ArrayList<>();
         stations.add(s1);
         stations.add(s2);
@@ -95,13 +99,13 @@ public class RoundRobinStrategyTest {
 
         RoundRobinStrategy strategy = new RoundRobinStrategy();
 
-        // Redistribuer plusieurs fois
-        strategy.redistribuer(stations); // 1er vélo -> s2 (car s2 vide)
-        strategy.redistribuer(stations); // 2e vélo -> s3 (car s3 vide)
+        // Redistribute multiple times
+        strategy.redistribute(stations); // 1st bike -> s2 (because s2 empty)
+        strategy.redistribute(stations); // 2nd bike -> s3 (because s3 empty)
         
-        // Vérification
-        assertEquals(1, s2.nbVehicules(), "s2 reçoit 1 vélo");
-        assertEquals(1, s3.nbVehicules(), "s3 reçoit 1 vélo");
-        assertEquals(8, s1.nbVehicules(), "s1 perd 2 vélos");
+        // Verification
+        assertEquals(1, s2.getVehicleCount(), "s2 receives 1 bike");
+        assertEquals(1, s3.getVehicleCount(), "s3 receives 1 bike");
+        assertEquals(8, s1.getVehicleCount(), "s1 loses 2 bikes");
     }
 }

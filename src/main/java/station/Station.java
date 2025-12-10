@@ -1,8 +1,12 @@
-package main.java.station;
+package station;
 
-import main.java.observer.Observer;
-import main.java.observer.Subject;
-import main.java.vehicule.*;
+import observer.Observer;
+import observer.Subject;
+import vehicule.Vehicle;
+import vehicule.Bike;
+import vehicule.Scooter;
+
+import station.Slot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,20 +14,19 @@ import java.util.List;
 public class Station implements Subject {
 
     private int id;
-    private int capacite;
-    private List<Emplacement> emplacements;
+    private int capacity;
+    private List<Slot> slots;
 
     private List<Observer> observers = new ArrayList<>();
-    private int toursVideConsecutifs = 0;
-    private int toursPleinesConsecutifs = 0;
+    private int consecutiveEmptyTurns = 0;
+    private int consecutiveFullTurns = 0;
 
-    public Station(int id, int capacite) {
+    public Station(int id, int capacity) {
         this.id = id;
-        this.capacite = capacite;
-        this.emplacements = new ArrayList<>();
-
-        for (int i = 0; i < capacite; i++) {
-            emplacements.add(new Emplacement(i));
+        this.capacity = capacity;
+        this.slots = new ArrayList<>();
+        for (int i = 0; i < capacity; i++) {
+            slots.add(new Slot(i));
         }
     }
 
@@ -32,27 +35,39 @@ public class Station implements Subject {
         return id;
     }
 
-    public boolean estPleine() {
-        return nbVehicules() == capacite;
+    public boolean isFull() {
+        return getVehicleCount() == capacity;
     }
 
-    public boolean estVide() {
-        return nbVehicules() == 0;
+    public boolean isEmpty() {
+        return getVehicleCount() == 0;
     }
 
-    public boolean aBesoinDeVelo() {
-        return nbVehicules() < capacite / 4;
+    /**
+     * Indicates whether this station needs more vehicles. A station is
+     * considered to need vehicles if fewer than a quarter of its slots are
+     * occupied.
+     */
+    public boolean needsVehicles() {
+        return getVehicleCount() < capacity / 4;
     }
 
-    public boolean aTropDeVelos() {
-        return nbVehicules() > capacite * 3 / 4;
+    /**
+     * Indicates whether this station has too many vehicles. A station has
+     * too many vehicles if more than three quarters of its slots are
+     * occupied.
+     */
+    public boolean hasTooManyVehicles() {
+        return getVehicleCount() > capacity * 3 / 4;
     }
 
-
-    public int nbVehicules() {
+    /**
+     * Returns the number of vehicles currently stored in the station.
+     */
+    public int getVehicleCount() {
         int count = 0;
-        for (Emplacement e : emplacements) {
-            if (!e.estLibre()) count++;
+        for (Slot s : slots) {
+            if (!s.isFree()) count++;
         }
         return count;
     }
@@ -76,73 +91,87 @@ public class Station implements Subject {
     }
 
     // --- Déposer un véhicule ---
-    public void deposer(Vehicule v) {
-        for (Emplacement e : emplacements) {
-            if (e.estLibre()) {
-                e.deposer(v);
-                notifyObservers("Dépôt de " + v.getDescription());
+    /**
+     * Deposits a vehicle into the first free slot. Notifies observers of the
+     * event. If the station is full, a notification is also sent.
+     *
+     * @param v the vehicle to deposit
+     */
+    public void deposit(Vehicle v) {
+        for (Slot s : slots) {
+            if (s.isFree()) {
+                s.deposit(v);
+                notifyObservers("Deposit of " + v.getDescription());
                 return;
             }
         }
-        notifyObservers("tentative de dépôt mais station pleine");
+        notifyObservers("attempted deposit but station full");
     }
 
     // --- Retirer un véhicule ---
-    public Vehicule retirer() {
-        for (Emplacement e : emplacements) {
-            Vehicule v = e.getVehicule();
-            if (v != null && v.estDisponible()) {
-                v.enregistrerLocation();
-                e.retirer();
-                notifyObservers("vehicule_retire");
+    /**
+     * Removes an available vehicle from this station and records the rental.
+     * The slot itself handles the state change and rental recording.
+     *
+     * @return the rented vehicle, or {@code null} if none was available
+     */
+    public Vehicle rent() {
+        for (Slot s : slots) {
+            Vehicle v = s.removeAndRecordRental();
+            if (v != null) {
+                notifyObservers("vehicle_removed");
                 return v;
             }
         }
-        notifyObservers("tentative de retrait mais station vide");
+        notifyObservers("attempted removal but station empty");
         return null;
     }
 
-    public Vehicule retirerSansEnregistrement() {
-        for (Emplacement e : emplacements) {
-            Vehicule v = e.getVehicule();
-            if (v != null && v.estDisponible()) {
-                // ici on ne fait PAS v.enregistrerLocation()
-                e.retirer();
-                notifyObservers("vehicule_retire");
+    /**
+     * Removes an available vehicle from this station without recording a rental.
+     * Used when redistributing vehicles between stations.
+     *
+     * @return the removed vehicle, or {@code null} if none was available
+     */
+    public Vehicle removeWithoutRecording() {
+        for (Slot s : slots) {
+            Vehicle v = s.removeWithoutRecording();
+            if (v != null) {
+                notifyObservers("vehicle_removed");
                 return v;
             }
         }
-        notifyObservers("tentative de retrait mais station vide");
+        notifyObservers("attempted removal but station empty");
         return null;
     }
 
-    public void mettreAJourCompteursOccupation() {
-        if (estVide()) {
-            toursVideConsecutifs++;
-            toursPleinesConsecutifs = 0;
-        } else if (estPleine()) {
-            toursPleinesConsecutifs++;
-            toursVideConsecutifs = 0;
+    public void updateOccupancyCounters() {
+        if (isEmpty()) {
+            consecutiveEmptyTurns++;
+            consecutiveFullTurns = 0;
+        } else if (isFull()) {
+            consecutiveFullTurns++;
+            consecutiveEmptyTurns = 0;
         } else {
-            // Ni vide ni pleine → on reset les deux compteurs
-            toursVideConsecutifs = 0;
-            toursPleinesConsecutifs = 0;
+            // neither empty nor full → reset both counters
+            consecutiveEmptyTurns = 0;
+            consecutiveFullTurns = 0;
         }
     }
 
-    public int getToursVideConsecutifs() {
-        return toursVideConsecutifs;
+    public int getConsecutiveEmptyTurns() {
+        return consecutiveEmptyTurns;
     }
 
-    public int getToursPleinesConsecutifs() {
-        return toursPleinesConsecutifs;
+    public int getConsecutiveFullTurns() {
+        return consecutiveFullTurns;
     }
     /**
-     * Remet à zéro le compteur toursSeul de tous les emplacements.
+     * Resets the alone-turn counter of all slots.
      */
-    private void reinitialiserTousLesCompteursToursSeul() {
-        for (Emplacement e : emplacements) {
-            e.resetToursSeul();
+    private void resetAllAloneTurnsCounters() {
+        for (Slot s : slots) {
+            s.resetAloneTurns();
         }
     }
 
@@ -151,12 +180,12 @@ public class Station implements Subject {
      * On incrémente le compteur de l'emplacement occupé, on remet à zéro
      * celui des emplacements libres, et on détecte un éventuel vol.
      */
-    private void traiterStationAvecUnSeulVehicule() {
-        for (Emplacement e : emplacements) {
-            if (!e.estLibre()) {
-                gererEmplacementOccupeSeul(e);
+    private void handleStationWithSingleVehicle() {
+        for (Slot s : slots) {
+            if (!s.isFree()) {
+                handleOccupiedSlotAlone(s);
             } else {
-                e.resetToursSeul();
+                s.resetAloneTurns();
             }
         }
     }
@@ -165,43 +194,32 @@ public class Station implements Subject {
      * Incrémente le compteur pour l'emplacement occupé et déclenche un vol
      * si le véhicule est resté seul trop longtemps.
      */
-    private void gererEmplacementOccupeSeul(Emplacement e) {
-        e.incrementerToursSeul();
-
-        if (e.getToursSeul() >= 2) {
-            Vehicule v = e.getVehicule();
-            if (v != null) {
-                v.signalerVol();
-            }
-            // On enlève définitivement le véhicule volé
-            e.retirer();
-        }
+    private void handleOccupiedSlotAlone(Slot s) {
+        // delegate the logic to the slot itself: it will track the number of
+        // turns the vehicle has been alone and trigger a theft if necessary
+        s.incrementAloneTurnsAndCheckTheft();
     }
 
-    public void verifierVolsPotentiels() {
-
-        // 1) Cas station vide : aucun vélo à surveiller
-        if (estVide()) {
-            reinitialiserTousLesCompteursToursSeul();
+    public void checkPotentialThefts() {
+        // 1) Empty station: nothing to watch
+        if (isEmpty()) {
+            resetAllAloneTurnsCounters();
             return;
         }
 
-        // 2) Cas avec plusieurs vélos : aucun n'est "seul"
-        if (nbVehicules() > 1) {
-            reinitialiserTousLesCompteursToursSeul();
+        // 2) More than one vehicle: none is alone
+        if (getVehicleCount() > 1) {
+            resetAllAloneTurnsCounters();
             return;
         }
 
-        // 3) Cas avec exactement un vélo dans la station
-        traiterStationAvecUnSeulVehicule();
+        // 3) Exactly one vehicle in the station
+        handleStationWithSingleVehicle();
     }
 
-    public void avancerMaintenanceVehicules() {
-        for (Emplacement e : emplacements) {
-            Vehicule v = e.getVehicule();
-            if (v != null) {
-                v.tourDeMaintenance();
-            }
+    public void advanceMaintenanceForVehicles() {
+        for (Slot s : slots) {
+            s.applyMaintenance();
         }
     }
 }

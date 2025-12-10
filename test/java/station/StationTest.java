@@ -1,67 +1,68 @@
-package test.java.station;
+package station;
 
-import main.java.vehicule.Velo;
-import main.java.station.Station;
-import main.java.vehicule.Vehicule;
+import vehicule.Bike;
+import vehicule.Vehicle;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Tests for the {@link Station} class. Verifies deposit and rental operations,
+ * capacity checks, and the logic for determining when a station needs more
+ * vehicles or has too many.
+ */
 class StationTest {
 
     @Test
-    void testDepotEtRetraitVehicule() {
+    void testDepositAndRentVehicle() {
         Station s = new Station(1, 2);
-        Vehicule v1 = new Velo("Velo1", 100.0);
+        Vehicle v1 = new Bike("Bike1", 100.0);
 
-        assertTrue(s.estVide());
-        s.deposer(v1);
-        assertEquals(1, s.nbVehicules());
-        assertFalse(s.estVide());
-        assertFalse(s.estPleine());
+        assertTrue(s.isEmpty());
+        s.deposit(v1);
+        assertEquals(1, s.getVehicleCount());
+        assertFalse(s.isEmpty());
+        assertFalse(s.isFull());
 
-        Vehicule retiré = s.retirer();
-        assertEquals(v1, retiré);
-        assertTrue(s.estVide());
+        Vehicle removed = s.rent();
+        assertEquals(v1, removed);
+        assertTrue(s.isEmpty());
     }
 
     @Test
-    void testEstPleineEtVide() {
+    void testIsFullAndIsEmpty() {
         Station s = new Station(1, 2);
-        assertTrue(s.estVide());
-        assertFalse(s.estPleine());
+        assertTrue(s.isEmpty());
+        assertFalse(s.isFull());
 
-        s.deposer(new Velo("V1", 100));
-        s.deposer(new Velo("V2", 120));
-        assertTrue(s.estPleine());
-        assertFalse(s.estVide());
+        s.deposit(new Bike("V1", 100));
+        s.deposit(new Bike("V2", 120));
+        assertTrue(s.isFull());
+        assertFalse(s.isEmpty());
     }
 
-    
     @Test
-    void testABesoinDeVelo() {
-        Station s = new Station(1, 4);
-        
-        // Station vide → doit avoir besoin de vélos
-        assertTrue(s.aBesoinDeVelo());
-
-        // Déposer 1 vélo → nbVehicules() = 1 → ne satisfait plus < 1
-        s.deposer(new Velo("V1", 100));
-        assertFalse(s.aBesoinDeVelo());
-    }
-
-
-    @Test
-    void testATropDeVelos() {
+    void testNeedsVehicles() {
         Station s = new Station(1, 4);
 
-        s.deposer(new Velo("V1", 100));
-        s.deposer(new Velo("V2", 100));
-        s.deposer(new Velo("V3", 100));
-        assertFalse(s.aTropDeVelos()); // 3 vélos → pas encore trop
+        // Empty station -> needs vehicles
+        assertTrue(s.needsVehicles());
 
-        s.deposer(new Velo("V4", 100));
-        assertTrue(s.aTropDeVelos()); // 4 vélos → trop de vélos
+        // Deposit 1 bike -> getVehicleCount() = 1 -> no longer less than capacity/4
+        s.deposit(new Bike("V1", 100));
+        assertFalse(s.needsVehicles());
     }
 
+    @Test
+    void testHasTooManyVehicles() {
+        Station s = new Station(1, 4);
+
+        s.deposit(new Bike("V1", 100));
+        s.deposit(new Bike("V2", 100));
+        s.deposit(new Bike("V3", 100));
+        assertFalse(s.hasTooManyVehicles()); // 3 bikes -> not too many yet
+
+        s.deposit(new Bike("V4", 100));
+        assertTrue(s.hasTooManyVehicles()); // 4 bikes -> too many
+    }
 }

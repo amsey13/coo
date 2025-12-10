@@ -1,73 +1,74 @@
-package main.java.strategy;
+package strategy;
 
-import main.java.station.*;
-import main.java.vehicule.Vehicule;
+import station.Station;
+import vehicule.Vehicle;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * A redistribution strategy that chooses random source and destination stations
+ * among those that have too many vehicles and those that need vehicles. At
+ * most one vehicle is moved per invocation.
+ */
 public class RandomRobinStrategy implements RedistributionStrategy {
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
     @Override
-    public void redistribuer(List<Station> stations) {
+    public void redistribute(List<Station> stations) {
         if (stations.isEmpty()) {
             return;
         }
 
-        List<Station> pleines = stationsPleines(stations);
-        List<Station> vides   = stationsVides(stations);
+        List<Station> full = fullStations(stations);
+        List<Station> needy = needyStations(stations);
 
-        if (!peutRedistribuer(pleines, vides)) {
+        if (!canRedistribute(full, needy)) {
             return;
         }
 
-        Station source      = choisirStationAleatoire(pleines);
-        Station destination = choisirStationAleatoire(vides);
+        Station source = chooseRandomStation(full);
+        Station destination = chooseRandomStation(needy);
 
-        deplacerUnVelo(source, destination);
+        moveOneVehicle(source, destination);
     }
 
-    private List<Station> stationsPleines(List<Station> stations) {
-        List<Station> pleines = new ArrayList<>();
+    private List<Station> fullStations(List<Station> stations) {
+        List<Station> full = new ArrayList<>();
         for (Station s : stations) {
-            if (s.aTropDeVelos()) {
-                pleines.add(s);
+            if (s.hasTooManyVehicles()) {
+                full.add(s);
             }
         }
-        return pleines;
+        return full;
     }
 
-    private List<Station> stationsVides(List<Station> stations) {
-        List<Station> vides = new ArrayList<>();
+    private List<Station> needyStations(List<Station> stations) {
+        List<Station> needy = new ArrayList<>();
         for (Station s : stations) {
-            if (s.aBesoinDeVelo()) {
-                vides.add(s);
+            if (s.needsVehicles()) {
+                needy.add(s);
             }
         }
-        return vides;
+        return needy;
     }
 
-    private boolean peutRedistribuer(List<Station> pleines, List<Station> vides) {
-        return !pleines.isEmpty() && !vides.isEmpty();
+    private boolean canRedistribute(List<Station> full, List<Station> needy) {
+        return !full.isEmpty() && !needy.isEmpty();
     }
 
-    private Station choisirStationAleatoire(List<Station> candidates) {
+    private Station chooseRandomStation(List<Station> candidates) {
         int index = random.nextInt(candidates.size());
         return candidates.get(index);
     }
 
-    private void deplacerUnVelo(Station source, Station destination) {
-        Vehicule vehicule = source.retirerSansEnregistrement(); 
-
-        if (vehicule == null) {
+    private void moveOneVehicle(Station source, Station destination) {
+        Vehicle vehicle = source.removeWithoutRecording();
+        if (vehicle == null) {
             return;
         }
-
-        destination.deposer(vehicule);
+        destination.deposit(vehicle);
     }
-
-
 }

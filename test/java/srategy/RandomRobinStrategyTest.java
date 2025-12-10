@@ -1,72 +1,75 @@
-package test.java.srategy;
+package srategy;
 
-import main.java.station.Station;
-import main.java.strategy.RandomRobinStrategy;
-import main.java.vehicule.Velo;
+import station.Station;
+import strategy.RandomRobinStrategy;
+import vehicule.Bike;
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Tests for the {@link RandomRobinStrategy}. This strategy randomly selects
+ * a source station with too many vehicles and a destination station that
+ * needs vehicles, moving exactly one vehicle between them.
+ */
 public class RandomRobinStrategyTest {
 
     @Test
-    void testRedistributionDeplaceUnVelo() {
-        // --- Préparation des stations ---
-        Station pleine = new Station(1, 4);
-        Station vide   = new Station(2, 4);
+    void testRedistributeMovesOneBike() {
+        Station full = new Station(1, 4);
+        Station empty = new Station(2, 4);
 
-        // Remplir la station pleine
-        pleine.deposer(new Velo("V1", 10));
-        pleine.deposer(new Velo("V2", 10));
-        pleine.deposer(new Velo("V3", 10));
-        pleine.deposer(new Velo("V4", 10)); // 4/4 => station pleine
-
-        // Aucune dépose dans vide => 0/4
+        // Fill the full station
+        full.deposit(new Bike("V1", 10));
+        full.deposit(new Bike("V2", 10));
+        full.deposit(new Bike("V3", 10));
+        full.deposit(new Bike("V4", 10)); // 4/4 => station full
 
         List<Station> stations = new ArrayList<>();
-        stations.add(pleine);
-        stations.add(vide);
+        stations.add(full);
+        stations.add(empty);
 
         RandomRobinStrategy strategy = new RandomRobinStrategy();
 
-        // Avant redistribution
-        assertEquals(4, pleine.nbVehicules());
-        assertEquals(0, vide.nbVehicules());
+        // Before redistribution
+        assertEquals(4, full.getVehicleCount());
+        assertEquals(0, empty.getVehicleCount());
 
-        // Action : redistribuer un vélo
-        strategy.redistribuer(stations);
+        // Action: redistribute one bike
+        strategy.redistribute(stations);
 
-        // Après redistribution : un vélo doit avoir bougé
-        assertEquals(3, pleine.nbVehicules(), "La station pleine doit perdre un vélo");
-        assertEquals(1, vide.nbVehicules(), "La station vide doit recevoir un vélo");
+        // After redistribution: one bike must have moved
+        assertEquals(3, full.getVehicleCount(), "The full station should lose one bike");
+        assertEquals(1, empty.getVehicleCount(), "The empty station should receive one bike");
     }
 
     @Test
-    void testAucuneRedistributionSiPasDeStationPleineOuVide() {
+    void testNoRedistributionIfNoFullOrEmptyStation() {
         Station s1 = new Station(1, 4);
         Station s2 = new Station(2, 4);
 
-        // Ces stations ne sont ni pleines ni vides => pas de redistribution
-        s1.deposer(new Velo("V1", 10)); // 1 vélo
-        s2.deposer(new Velo("V2", 10)); // 1 vélo
+        // These stations are neither full nor empty => no redistribution
+        s1.deposit(new Bike("V1", 10)); // 1 bike
+        s2.deposit(new Bike("V2", 10)); // 1 bike
 
         List<Station> stations = List.of(s1, s2);
 
         RandomRobinStrategy strategy = new RandomRobinStrategy();
 
-        strategy.redistribuer(stations);
+        strategy.redistribute(stations);
 
-        // Rien ne doit changer
-        assertEquals(1, s1.nbVehicules());
-        assertEquals(1, s2.nbVehicules());
+        // Nothing should change
+        assertEquals(1, s1.getVehicleCount());
+        assertEquals(1, s2.getVehicleCount());
     }
 
     @Test
-    void testAucuneRedistributionSiListeStationsVide() {
+    void testNoRedistributionIfStationListEmpty() {
         RandomRobinStrategy strategy = new RandomRobinStrategy();
 
-        strategy.redistribuer(new ArrayList<>()); // ne doit pas planter
+        strategy.redistribute(new ArrayList<>()); // should not throw
     }
 }

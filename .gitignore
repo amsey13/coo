@@ -1,6 +1,8 @@
-/bin/
-"*/.class" 
-"*.jar" 
-"*.project" 
-"bin/" 
-"out/" 
+out/
+bin/
+*.class
+
+.idea/
+*.iml
+
+.DS_Store

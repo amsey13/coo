@@ -1,12 +1,12 @@
-package main.java.simulation;
+package simulation;
 
-import main.java.accessories.Panier;
-import main.java.contolcenter.*;
-import main.java.station.Station;
-import main.java.utilisateurs.Utilisateur;
-import main.java.strategy.RoundRobinStrategy;
-import main.java.factory.VeloFactory;
-import main.java.vehicule.Vehicule;
+import accessories.Basket;
+import contolcenter.ControlCenter;
+import station.Station;
+import utilisateurs.User;
+import strategy.RoundRobinStrategy;
+import factory.BikeFactory;
+import vehicule.Vehicle;
 
 
 import java.util.ArrayList;
@@ -15,28 +15,29 @@ import java.util.Random;
 
 public class Simulation {
 
-    private int tempsCourant = 0;
-    private int intervalleTemps = 1; // 1 unité par tour
+    private int currentTime = 0;
+    private int timeInterval = 1; // 1 unit per turn
 
-    private List<Station> stations = new ArrayList<>();
-    private List<Utilisateur> utilisateurs = new ArrayList<>();
-    private VeloFactory factory = new VeloFactory();
+    private final List<Station> stations = new ArrayList<>();
+    private final List<User> users = new ArrayList<>();
+    private final BikeFactory factory = new BikeFactory();
 
-    private CentreControle centre;
+    private ControlCenter controlCenter;
 
     private Random random = new Random();
 
     public Simulation() {
-        initialiser();
+        initialize();
     }
 
-    public void initialiser() {
+    public void initialize() {
 
-        // --- Centre de contrôle ---
-        centre = new CentreControle(999);
-        centre.setStrategy(new RoundRobinStrategy());
+        // --- Control centre ---
+        // initialise the control centre and its redistribution strategy
+        controlCenter = new ControlCenter(999);
+        controlCenter.setStrategy(new RoundRobinStrategy());
 
-        // --- Création des stations ---
+        // --- Create the stations ---
         Station s1 = new Station(1, 10);
         Station s2 = new Station(2, 12);
         Station s3 = new Station(3, 15);
@@ -45,165 +46,165 @@ public class Simulation {
         stations.add(s2);
         stations.add(s3);
 
-        // --- Le centre observe les stations ---
+        // --- The control centre observes the stations ---
         for (Station s : stations) {
-            s.addObserver(centre);
-            centre.ajouterStation(s);
+            s.addObserver(controlCenter);
+            controlCenter.addStation(s);
         }
 
-        // --- Création de quelques utilisateurs ---
-        utilisateurs.add(new Utilisateur(1, 10.0));
-        utilisateurs.add(new Utilisateur(2, 5.0));
-        utilisateurs.add(new Utilisateur(3, 3.0));
+        // --- Create a few users ---
+        users.add(new User(1, 10.0));
+        users.add(new User(2, 5.0));
+        users.add(new User(3, 3.0));
 
-        System.out.println("=== Simulation initialisée ===");
+        System.out.println("=== Simulation initialised ===");
     }
 
-    // --- Action aléatoire : dépôt ou retrait ---
-    private void genererActionsAleatoires() {
+    // --- Random actions: deposit or rent ---
+    private void generateRandomActions() {
         for (Station s : stations) {
 
-            int action = random.nextInt(3);  // 0 rien, 1 dépôt, 2 retrait
+            int action = random.nextInt(3);  // 0 nothing, 1 deposit, 2 rent
 
             if (action == 1) {
-                Vehicule v = factory.creerVehicule(random.nextInt(1000), "classique", 2.0);
+                Vehicle v = factory.createVehicle(random.nextInt(1000), "classic", 2.0);
                 if (random.nextBoolean()) {
-                    v = new Panier(v);
+                    v = new Basket(v);
                 }
 
-                s.deposer(v);
+                s.deposit(v);
                 System.out.println("Station " + s.getId()
-                    + " : dépôt auto -> " + v.getDescription()
-                    + " (coût = " + v.getCout() + "€)");
+                    + " : automatic deposit -> " + v.getDescription()
+                    + " (cost = " + v.getCost() + ")");
             }
             else if (action == 2) {
-                s.retirer();
-                System.out.println("Station " + s.getId() + " : retrait auto");
+                s.rent();
+                System.out.println("Station " + s.getId() + " : automatic rental");
             }
         }
     }
     // Simulation.java
 
-    // --- Actions des utilisateurs : louer / rendre ---
-    private void genererActionsUtilisateurs() {
-        for (Utilisateur u : utilisateurs) {
+    // --- User actions: rent/return ---
+    private void generateUserActions() {
+        for (User u : users) {
 
-            // Cas 1 : l'utilisateur a déjà un vélo → il a une chance de le rendre
-            if (u.getVehiculeLoueId() != null) {
+            // Case 1: the user already has a bike → chance to return it
+            if (u.getRentedVehicleId() != null) {
 
-                // 50% de chances de rendre
+                // 50% chance to return
                 if (random.nextBoolean()) {
 
-                    // choisir une station aléatoire
-                    Station stationRetour = stations.get(random.nextInt(stations.size()));
+                    // choose a random station
+                    Station returnStation = stations.get(random.nextInt(stations.size()));
 
-                    if (!stationRetour.estPleine()) {
-                        // Simplification : on ne stocke pas l'objet Vélo, on remet un nouveau
-                        Vehicule v = factory.creerVehicule(
-                                random.nextInt(1000), "classique", 2.0);
+                    if (!returnStation.isFull()) {
+                        // We do not store the rented bike object, we just deposit a new one
+                        Vehicle v = factory.createVehicle(
+                                random.nextInt(1000), "classic", 2.0);
 
                         if (random.nextBoolean()) {
-                            v = new Panier(v);
+                            v = new Basket(v);
                         }
 
-                        stationRetour.deposer(v);
-                        u.rendreVehicule();
-                        System.out.println("Utilisateur " + u.getId()
-                            + " rend un vélo à la station " + stationRetour.getId());
+                        returnStation.deposit(v);
+                        u.returnVehicle();
+                        System.out.println("User " + u.getId()
+                            + " returns a bike to station " + returnStation.getId());
                     } else {
-                        System.out.println("Utilisateur " + u.getId()
-                            + " veut rendre un vélo mais la station "
-                            + stationRetour.getId() + " est pleine.");
+                        System.out.println("User " + u.getId()
+                            + " wants to return a bike but station "
+                            + returnStation.getId() + " is full.");
                     }
                 }
 
-            // Cas 2 : l'utilisateur n'a pas de vélo → il a une chance de louer
+            // Case 2: the user has no bike → chance to rent
             } else {
 
-                // 50% de chances d'essayer de louer
+                // 50% chance to attempt a rental
                 if (random.nextBoolean()) {
 
-                    // On cherche les stations non vides
+                    // Find stations that are not empty
                     List<Station> candidates = new ArrayList<>();
                     for (Station s : stations) {
-                        if (!s.estVide()) {
+                        if (!s.isEmpty()) {
                             candidates.add(s);
                         }
                     }
 
                     if (candidates.isEmpty()) {
-                        System.out.println("Utilisateur " + u.getId()
-                            + " veut louer mais toutes les stations sont vides.");
+                        System.out.println("User " + u.getId()
+                            + " wants to rent but all stations are empty.");
                         continue;
                     }
 
-                    Station stationDepart = candidates.get(
+                    Station departureStation = candidates.get(
                             random.nextInt(candidates.size()));
 
-                    // Retrait d'un vélo → déclenche enregistrerLocation()
-                    Vehicule v = stationDepart.retirer();
+                    // Withdrawal of a bike → triggers recordRental()
+                    Vehicle v = departureStation.rent();
 
                     if (v == null) {
-                        System.out.println("Utilisateur " + u.getId()
-                            + " veut louer mais aucun vélo disponible en pratique.");
+                        System.out.println("User " + u.getId()
+                            + " wants to rent but no bike is actually available.");
                         continue;
                     }
 
-                    double cout = v.getCout();
+                    double cost = v.getCost();
 
-                    if (u.peutPayer(cout)) {
-                        // Id "virtuel" pour suivre la location
-                        int idLocation = v.hashCode();
-                        u.louerVehicule(idLocation, cout);
+                    if (u.canPay(cost)) {
+                        // virtual id to track the rental
+                        int rentalId = v.hashCode();
+                        u.rentVehicle(rentalId, cost);
 
-                        System.out.println("Utilisateur " + u.getId()
-                            + " loue un vélo à la station " + stationDepart.getId()
-                            + " pour " + cout + "€. Solde restant : " + u.getSolde());
+                        System.out.println("User " + u.getId()
+                            + " rents a bike at station " + departureStation.getId()
+                            + " for " + cost + ". Remaining balance: " + u.getBalance());
                     } else {
-                        // Pas assez d'argent → on remet le vélo dans la station
-                        System.out.println("Utilisateur " + u.getId()
-                            + " n'a pas assez d'argent pour louer ce vélo (coût = "
-                            + cout + "€, solde = " + u.getSolde() + "€)");
-                        stationDepart.deposer(v);
+                        // Not enough money → put the bike back in the station
+                        System.out.println("User " + u.getId()
+                            + " does not have enough money to rent this bike (cost = "
+                            + cost + ", balance = " + u.getBalance() + ")");
+                        departureStation.deposit(v);
                     }
                 }
             }
         }
     }
 
-    // --- Un tour de simulation ---
-    public void lancerTour() {
+    // --- One turn of simulation ---
+    public void runTurn() {
 
-        System.out.println("\n--- Temps = " + tempsCourant + " ---");
-        
-        genererActionsAleatoires();
+        System.out.println("\n--- Time = " + currentTime + " ---");
 
-        genererActionsUtilisateurs();
+        generateRandomActions();
 
-        // Vérification des vols potentiels
+        generateUserActions();
+
+        // Check potential thefts and advance maintenance
         for (Station s : stations) {
-            s.verifierVolsPotentiels();
-            s.avancerMaintenanceVehicules();
+            s.checkPotentialThefts();
+            s.advanceMaintenanceForVehicles();
         }
-        // Redistribution manuelle simple
-        centre.verifierStationsEtRedistribuerSiNecessaire();
-        tempsCourant += intervalleTemps;
+        // Manual redistribution
+        controlCenter.checkStationsAndRedistributeIfNecessary();
+        currentTime += timeInterval;
     }
 
-    // --- Lancement de toute la simulation ---
-    public void lancer(int nbTours) {
-        for (int i = 0; i < nbTours; i++) {
-            lancerTour();
+    // --- Run the entire simulation ---
+    public void run(int turns) {
+        for (int i = 0; i < turns; i++) {
+            runTurn();
         }
 
-        System.out.println("\n=== Fin de simulation ===");
-        System.out.println(centre.getHistorique());
+        System.out.println("\n=== End of simulation ===");
+        System.out.println(controlCenter.getHistory());
     }
 
     // --- MAIN pour tester ---
     public static void main(String[] args) {
         Simulation sim = new Simulation();
-        sim.lancer(5);  // exécute 5 tours
+        sim.run(5);  // run 5 turns
     }
 }
 
