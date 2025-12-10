@@ -8,11 +8,16 @@ import strategy.RoundRobinStrategy;
 import factory.BikeFactory;
 import vehicule.Vehicle;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Simple simulation for the bike rental system.
+ * It creates a few stations and users, and then simulates
+ * random automatic actions and user actions, plus redistribution
+ * by the control center.
+ */
 public class Simulation {
 
     private int currentTime = 0;
@@ -30,10 +35,13 @@ public class Simulation {
         initialize();
     }
 
+    /**
+     * Initialises the simulation: creates stations, users and the control center.
+     */
     public void initialize() {
 
-        // --- Control centre ---
-        // initialise the control centre and its redistribution strategy
+        // --- Control center ---
+        // initialise the control center and its redistribution strategy
         controlCenter = new ControlCenter(999);
         controlCenter.setStrategy(new RoundRobinStrategy());
 
@@ -46,7 +54,7 @@ public class Simulation {
         stations.add(s2);
         stations.add(s3);
 
-        // --- The control centre observes the stations ---
+        // --- The control center observes the stations ---
         for (Station s : stations) {
             s.addObserver(controlCenter);
             controlCenter.addStation(s);
@@ -60,7 +68,13 @@ public class Simulation {
         System.out.println("=== Simulation initialised ===");
     }
 
-    // --- Random actions: deposit or rent ---
+    // ------------------------------------------------------------------
+    //                   RANDOM STATION ACTIONS
+    // ------------------------------------------------------------------
+
+    /**
+     * Random automatic actions on stations: deposit or rent.
+     */
     private void generateRandomActions() {
         for (Station s : stations) {
 
@@ -76,16 +90,20 @@ public class Simulation {
                 System.out.println("Station " + s.getId()
                     + " : automatic deposit -> " + v.getDescription()
                     + " (cost = " + v.getCost() + ")");
-            }
-            else if (action == 2) {
+            } else if (action == 2) {
                 s.rent();
                 System.out.println("Station " + s.getId() + " : automatic rental");
             }
         }
     }
-    // Simulation.java
 
-    // --- User actions: rent/return ---
+    // ------------------------------------------------------------------
+    //                       USER ACTIONS
+    // ------------------------------------------------------------------
+
+    /**
+     * User actions: rent or return a bike, depending on their current state.
+     */
     private void generateUserActions() {
         for (User u : users) {
 
@@ -172,13 +190,18 @@ public class Simulation {
         }
     }
 
-    // --- One turn of simulation ---
+    // ------------------------------------------------------------------
+    //                     SIMULATION PROGRESSION
+    // ------------------------------------------------------------------
+
+    /**
+     * Runs one turn of the simulation.
+     */
     public void runTurn() {
 
         System.out.println("\n--- Time = " + currentTime + " ---");
 
         generateRandomActions();
-
         generateUserActions();
 
         // Check potential thefts and advance maintenance
@@ -186,12 +209,17 @@ public class Simulation {
             s.checkPotentialThefts();
             s.advanceMaintenanceForVehicles();
         }
+
         // Manual redistribution
         controlCenter.checkStationsAndRedistributeIfNecessary();
         currentTime += timeInterval;
     }
 
-    // --- Run the entire simulation ---
+    /**
+     * Runs the whole simulation for the given number of turns.
+     *
+     * @param turns number of turns to run
+     */
     public void run(int turns) {
         for (int i = 0; i < turns; i++) {
             runTurn();
@@ -201,10 +229,28 @@ public class Simulation {
         System.out.println(controlCenter.getHistory());
     }
 
-    // --- MAIN pour tester ---
+    // ------------------------------------------------------------------
+    //                        GETTERS FOR TESTS
+    // ------------------------------------------------------------------
+
+    public List<Station> getStations() {
+        return stations;
+    }
+
+    public ControlCenter getControlCenter() {
+        return controlCenter;
+    }
+
+    public int getCurrentTime() {
+        return currentTime;
+    }
+
+    // ------------------------------------------------------------------
+    //                           MAIN (MANUAL TEST)
+    // ------------------------------------------------------------------
+
     public static void main(String[] args) {
         Simulation sim = new Simulation();
         sim.run(5);  // run 5 turns
     }
 }
-
