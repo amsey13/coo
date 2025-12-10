@@ -1,4 +1,4 @@
-package srategy;
+package strategy;
 
 import station.Station;
 import strategy.RandomRobinStrategy;

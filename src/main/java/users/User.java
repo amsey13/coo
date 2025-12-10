@@ -1,15 +1,20 @@
-package utilisateurs;
+package users;
+
+import vehicule.Vehicle;
 
 /**
  * Represents a user of the bike sharing system. A user has an identifier,
  * a balance from which rental costs are deducted and at most one rented
- * vehicle tracked by its identifier. All method names are in English to
+ * vehicle tracked by its reference. All method names are in English to
  * avoid mixing languages in the API.
  */
 public class User {
     private final int id;
     private double balance;
-    private Integer rentedVehicleId; // null if no vehicle rented
+    /**
+     * The vehicle currently rented by this user, or {@code null} if none.
+     */
+    private Vehicle rentedVehicle; // null if no vehicle rented
 
     /**
      * Constructs a user with the given identifier and starting balance.
@@ -20,7 +25,7 @@ public class User {
     public User(int id, double balance) {
         this.id = id;
         this.balance = balance;
-        this.rentedVehicleId = null;
+        this.rentedVehicle = null;
     }
 
     /**
@@ -50,39 +55,53 @@ public class User {
      * @return {@code true} if a vehicle is rented, otherwise {@code false}
      */
     public boolean hasVehicle() {
-        return rentedVehicleId != null;
+        return rentedVehicle != null;
     }
 
     /**
      * Attempts to rent a vehicle for the user. If the user does not already
      * have a vehicle and has sufficient balance, the cost is deducted and
-     * the rented vehicle identifier is recorded. Informational messages are
-     * printed to standard output to trace the operation.
+     * the rented vehicle reference is recorded. The vehicle's rental counter
+     * is also updated.
      *
-     * @param vehicleId the identifier of the vehicle being rented
-     * @param cost      the rental cost
+     * @param vehicle the vehicle being rented (must not be {@code null})
+     * @param cost    the rental cost
      */
-    public void rentVehicle(int vehicleId, double cost) {
+    public void rentVehicle(Vehicle vehicle, double cost) {
+        if (vehicle == null) {
+            throw new IllegalArgumentException("vehicle must not be null");
+        }
+
         if (!hasVehicle() && canPay(cost)) {
             pay(cost);
-            rentedVehicleId = vehicleId;
-            System.out.println("User " + id + " has rented vehicle " + vehicleId);
+            this.rentedVehicle = vehicle;
+
+            // Important: update the vehicle's rental count / state
+            vehicle.recordRental();
+
+            System.out.println("User " + id + " has rented " + vehicle.getDescription());
         } else {
             System.out.println("Rental not possible for user " + id);
         }
     }
 
     /**
-     * Returns the vehicle currently rented by the user. If no vehicle is
-     * rented, an informational message is printed.
+     * Returns the vehicle currently rented by the user and clears the rental.
+     * If no vehicle is rented, an informational message is printed and
+     * {@code null} is returned.
+     *
+     * @return the rented vehicle, or {@code null} if none
      */
-    public void returnVehicle() {
-        if (hasVehicle()) {
-            System.out.println("User " + id + " has returned vehicle " + rentedVehicleId);
-            rentedVehicleId = null;
-        } else {
+    public Vehicle returnVehicle() {
+        if (!hasVehicle()) {
             System.out.println("No vehicle to return");
+            return null;
         }
+
+        Vehicle v = this.rentedVehicle;
+        this.rentedVehicle = null;
+        System.out.println("User " + id + " has returned vehicle " + v.getDescription());
+        return v;
     }
 
     /**
@@ -104,12 +123,12 @@ public class User {
     }
 
     /**
-     * Returns the identifier of the currently rented vehicle, or {@code null}
-     * if none.
+     * Returns the vehicle currently rented, or {@code null} if none.
+     * This replaces the previous integer identifier.
      *
-     * @return the rented vehicle identifier or {@code null}
+     * @return the rented vehicle or {@code null}
      */
-    public Integer getRentedVehicleId() {
-        return rentedVehicleId;
+    public Vehicle getRentedVehicle() {
+        return rentedVehicle;
     }
 }

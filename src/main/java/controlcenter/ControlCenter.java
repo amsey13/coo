@@ -1,4 +1,4 @@
-package contolcenter;
+package controlcenter;
 
 import observer.Observer;
 import station.Station;

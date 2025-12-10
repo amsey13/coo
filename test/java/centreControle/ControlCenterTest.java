@@ -1,12 +1,14 @@
 package centreControle;
 
-import contolcenter.ControlCenter;
 import station.Station;
 import strategy.RandomRobinStrategy;
 import strategy.RoundRobinStrategy;
 import vehicule.Bike;
 
 import org.junit.jupiter.api.Test;
+
+import controlcenter.ControlCenter;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**

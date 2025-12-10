@@ -1,11 +1,13 @@
-package utilisateurs;
+package users;
 
 import org.junit.jupiter.api.Test;
+
+import users.User;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for the {@link utilisateurs.User} class. Verifies that payments are
+ * Tests for the {@link users.User} class. Verifies that payments are
  * correctly handled and that the user cannot rent more than one vehicle at a time.
  */
 public class UserTest {

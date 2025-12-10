@@ -1,10 +1,10 @@
 package simulation;
 
 import accessories.Basket;
-import contolcenter.ControlCenter;
+import controlcenter.ControlCenter;
 import station.Station;
-import utilisateurs.User;
 import strategy.RoundRobinStrategy;
+import users.User;
 import factory.BikeFactory;
 import vehicule.Vehicle;
 
@@ -108,7 +108,7 @@ public class Simulation {
         for (User u : users) {
 
             // Case 1: the user already has a bike → chance to return it
-            if (u.getRentedVehicleId() != null) {
+            if (u.hasVehicle()) {
 
                 // 50% chance to return
                 if (random.nextBoolean()) {
@@ -117,18 +117,14 @@ public class Simulation {
                     Station returnStation = stations.get(random.nextInt(stations.size()));
 
                     if (!returnStation.isFull()) {
-                        // We do not store the rented bike object, we just deposit a new one
-                        Vehicle v = factory.createVehicle(
-                                random.nextInt(1000), "classic", 2.0);
+                        // Get the real rented vehicle object from the user
+                        Vehicle v = u.returnVehicle();
 
-                        if (random.nextBoolean()) {
-                            v = new Basket(v);
+                        if (v != null) {
+                            returnStation.deposit(v);
+                            System.out.println("User " + u.getId()
+                                + " returns a bike to station " + returnStation.getId());
                         }
-
-                        returnStation.deposit(v);
-                        u.returnVehicle();
-                        System.out.println("User " + u.getId()
-                            + " returns a bike to station " + returnStation.getId());
                     } else {
                         System.out.println("User " + u.getId()
                             + " wants to return a bike but station "
@@ -159,7 +155,7 @@ public class Simulation {
                     Station departureStation = candidates.get(
                             random.nextInt(candidates.size()));
 
-                    // Withdrawal of a bike → triggers recordRental()
+                    // Withdrawal of a bike
                     Vehicle v = departureStation.rent();
 
                     if (v == null) {
@@ -171,9 +167,8 @@ public class Simulation {
                     double cost = v.getCost();
 
                     if (u.canPay(cost)) {
-                        // virtual id to track the rental
-                        int rentalId = v.hashCode();
-                        u.rentVehicle(rentalId, cost);
+                        // User now stores the vehicle, not just an ID
+                        u.rentVehicle(v, cost);
 
                         System.out.println("User " + u.getId()
                             + " rents a bike at station " + departureStation.getId()

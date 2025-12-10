@@ -1,9 +1,10 @@
 package simulation;
 
-import contolcenter.ControlCenter;
 import station.Station;
 
 import org.junit.jupiter.api.Test;
+
+import controlcenter.ControlCenter;
 
 import java.util.List;
 

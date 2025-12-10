@@ -36,7 +36,7 @@ public abstract class AbstractVehicle implements Vehicle {
     /**
      * Maximum number of rentals before triggering automatic maintenance.
      */
-    protected static final int RENTAL_LIMIT = 20;
+    protected static final int RENTAL_LIMIT = 5;
 
     /**
      * Remaining number of maintenance ticks while the vehicle is out of
