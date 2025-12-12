@@ -20,18 +20,23 @@ public class Repairer implements Visitor {
     @Override
     public void visitVehicle(Vehicle v) {
         System.out.println("Repairer " + id + " inspects: " + v.getDescription());
-        v.startMaintenance(1);
+        // Start a maintenance period lasting two turns. During this time the
+        // vehicle will remain unavailable until two maintenance ticks have been
+        // applied.
+        v.startMaintenance(2);
     }
 
     @Override
     public void visit(Bike v) {
         System.out.println("Repairer " + id + " inspects: " + v.getDescription());
-        v.startMaintenance(1);
+        // Start a two‑turn maintenance period for bikes as well
+        v.startMaintenance(2);
     }
 
     @Override
     public void visit(Scooter s) {
         System.out.println("Repairer " + id + " inspects: " + s.getDescription());
-        s.startMaintenance(1);
+        // Start a two‑turn maintenance period for scooters
+        s.startMaintenance(2);
     }
 }

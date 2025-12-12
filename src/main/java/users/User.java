@@ -44,6 +44,11 @@ public class User {
      * @param amount the amount to deduct
      */
     public void pay(double amount) {
+        // Negative payments are not allowed: prevent increasing the user's
+        // balance accidentally. A negative payment is considered an error.
+        if (amount < 0) {
+            throw new IllegalArgumentException("Amount to pay cannot be negative");
+        }
         if (canPay(amount)) {
             balance -= amount;
         }
@@ -68,17 +73,20 @@ public class User {
      * @param cost    the rental cost
      */
     public void rentVehicle(Vehicle vehicle, double cost) {
+        // Validate input parameters
         if (vehicle == null) {
             throw new IllegalArgumentException("vehicle must not be null");
         }
-
+        if (cost < 0) {
+            throw new IllegalArgumentException("Rental cost cannot be negative");
+        }
+        // Only rent if the user currently has no vehicle and can afford the cost
         if (!hasVehicle() && canPay(cost)) {
+            // Deduct the rental cost from the user's balance
             pay(cost);
             this.rentedVehicle = vehicle;
-
-            // Important: update the vehicle's rental count / state
+            // Update the vehicle's rental state and counters
             vehicle.recordRental();
-
             System.out.println("User " + id + " has rented " + vehicle.getDescription());
         } else {
             System.out.println("Rental not possible for user " + id);

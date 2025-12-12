@@ -98,6 +98,12 @@ public class Station implements Subject {
      * @param v the vehicle to deposit
      */
     public void deposit(Vehicle v) {
+        // Fail fast on a null vehicle to avoid corrupting the station state.
+        if (v == null) {
+            throw new IllegalArgumentException("Cannot deposit a null vehicle");
+        }
+        // Try to find a free slot for the vehicle. If one exists, deposit
+        // the vehicle and notify observers of the successful deposit.
         for (Slot s : slots) {
             if (s.isFree()) {
                 s.deposit(v);
@@ -105,6 +111,10 @@ public class Station implements Subject {
                 return;
             }
         }
+        // If no free slot exists the station is full. Notify observers of the
+        // attempt but do not deposit the vehicle. We deliberately do not
+        // throw an exception here to leave the caller responsible for
+        // handling the full case.
         notifyObservers("attempted deposit but station full");
     }
 
