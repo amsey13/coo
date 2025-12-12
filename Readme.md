@@ -13,41 +13,30 @@ La simulation inclut la gestion des utilisateurs, des états de vélos, des acce
 
 ## 2. HowTo
 
-### 2.1 Récupérer les sources
+### 2.1 Récupérer les sources depuis le depôt git
 bash
-git clone <>
+git clone <https://gitlab-etu.fil.univ-lille.fr/kadiatou.barry2.etu/projet_coo.git>
 cd projet_coo
 
 ### 2.2 Générer la documentation
-
-javadoc -d docs -sourcepath src/main/java -subpackages main.java
-La documentation sera générée dans le dossier docs/.
-
+make doc
+Toute la documentation sera dans le dossier doc à la racine du projet
 ### Compiler et exécuter les sources
-javac -d bin -cp "lib/junit-platform-console-standalone-1.10.2.jar" src/main/java/**/*.java
-javac -d bin src/main/java/simulation/Simulation.java
-Se placer à la racine du projet pour exécuter ces commandes.
+make compile
+make run
 
 ### 2.4 Compiler et exécuter les tests
-javac -d bin -cp "lib/junit-platform-console-standalone-1.10.2.jar" test/java/**/*.java
-java -jar lib/junit-platform-console-standalone-1.10.2.jar --class-path bin --scan-class-path
+make test
 
 ### 2.5 Générer et exécuter l’archive (.jar)
-jar --create --file projet_coo.jar -C bin .
-java -jar projet_coo.jar
+make jar
 
 ## 3. Présentation du code et éléments saillants
 ### 3.1 Architecture principale
 
-Velo : différents types et accessoires, état du vélo.
 
-Station : gestion des emplacements, dépôt/retrait, maintenance.
 
-Utilisateur : location de vélos selon le solde disponible.
 
-CentreControle : observer des stations et redistribution des vélos (stratégie Round Robin ou aléatoire).
-
-Simulation : boucle principale simulant les tours de temps et les actions aléatoires.
 
 ### 3.2 Patterns utilisés
 
