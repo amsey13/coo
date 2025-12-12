@@ -1,4 +1,4 @@
-package controlCenter;
+package controlcenter;
 
 import station.Station;
 import strategy.RandomRobinStrategy;
