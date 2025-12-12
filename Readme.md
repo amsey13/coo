@@ -15,7 +15,7 @@ La simulation inclut la gestion des utilisateurs, des états de vélos, des acce
 
 ### 2.1 Récupérer les sources
 bash
-git clone <URL_DU_DEPOT_GITLAB>
+git clone <>
 cd projet_coo
 
 ### 2.2 Générer la documentation
